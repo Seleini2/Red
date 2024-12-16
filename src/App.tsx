@@ -1,40 +1,37 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const client = generateClient<Schema>();
+const Home: React.FC = () => {
+    return (
+        <div>
+            <h1>Welcome to the Home Page</h1>
+            <p>This is the main page of your application.</p>
+        </div>
+    );
+};
 
-function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+const RedirectComponent: React.FC = () => {
+    React.useEffect(() => {
+        const path = window.location.pathname.split('/').pop();
+        if (path) {
+            window.location.href = `https://google.com/${path}`;
+        }
+    }, []);
+    return null;
+};
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
+const App: React.FC = () => {
+    return (
+        <Router>
+            <Routes>
+                {/* Route for the home page */}
+                <Route path="/" element={<Home />} />
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-
-  return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        Hey
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-    </main>
-  );
-}
+                {/* Route for dynamic redirects */}
+                <Route path="/:dynamicValue" element={<RedirectComponent />} />
+            </Routes>
+        </Router>
+    );
+};
 
 export default App;
